@@ -1,0 +1,53 @@
+{#{% extends "base.html" %}#}
+{#{% load bootstrap3 %}#}
+{##}
+{#{% block title %}Profile{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#    {% csrf_token %}#}
+{##}
+{#    <h1>Hi {{ profile.user.first_name }}, welcome to your profile:</h1>#}
+{##}
+{#    <form action = '' method = 'POST'>#}
+{##}
+{#    {% csrf_token %}#}
+{#    {% bootstrap_form form layout='inline'%}#}
+{#    <input type = 'submit' value = "Register" />#}
+{#    </form>#}
+{#{% endblock %}#}
+
+{#{% extends "base.html" %}#}
+{##}
+{#{% block content %}#}
+{#    I AM AN PROFILE PAGE#}
+{#{% endblock %}#}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+    <div id="header">
+        <h1 class="title">My Facebook</h1>
+        {% if user.is_authenticated %}
+            <h1>Hi {{ user.first_name }}, welcome myFacebook:</h1>
+            You can: <br>
+            <a href="{% url 'update_profile' user.profile.id %}">Update your account</a><br>
+{#            <a href="{% url 'upload_pictures' profile_id %}">Upload photos to your account</a>#}
+
+        {% else %}
+            <a href="{% url 'login' %}">Login</a> if you already have an account.<br>
+            OR <a href="{% url 'register' %}">Register</a> if you need a new account.
+
+        {% endif %}
+    </div>
+
+</body>
+</html>
+
+
