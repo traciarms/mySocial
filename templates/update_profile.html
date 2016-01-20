@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}Update Profile{% endblock %}
+
+{% block content %}
+    <h1>Would you like to update your profile?</h1>
+    <form method="post" action="{% url 'update_profile' profile.id %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" name="submit" value="Submit Change">
+    </form>
+
+{% endblock %}
