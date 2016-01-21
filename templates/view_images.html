@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}Your Photos{% endblock %}
+
+{% block content %}
+    <h1>Here are your account photos:</h1>
+    {% for image in image_list %}
+        <li>{{ image.url }}</li>
+
+    {% endfor %}
+    <br>
+    <a href="{% url 'profile' user.profile.id %}">Return to your profile.</a>
+{% endblock %}

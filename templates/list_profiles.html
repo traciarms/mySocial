@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}Profile list{% endblock %}
+
+{% block content %}
+    <h1>Here are the profiles we found:</h1>
+    {% for profile in profile_list %}
+        <a href="{% url 'profile' profile.id %}">
+            {{ profile.user.first_name }} {{ profile.user.last_name }}</a>
+    {% endfor %}
+
+{% endblock %}
