@@ -1,10 +1,16 @@
 from django.contrib.auth import authenticate, login
+from django.core.files.uploadhandler import FileUploadHandler
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, render_to_response
+from django.template import RequestContext
+from django.utils.datetime_safe import datetime
 from django.views.generic import ListView, UpdateView
-from profile.forms import ProfileCreationForm, ProfileForm
-from profile.models import Profile
+from myfacebook.settings import MEDIA_ROOT
+from profile.forms import ProfileCreationForm, ProfileForm, UploadImageForm, \
+    CommentForm, WallPostForm, ProfileSearchForm
+from profile.models import Profile, Image, WallPost, PostComment
 
 __author__ = 'traciarms'
 
@@ -29,8 +35,119 @@ def create_user(request):
     else:
         form = ProfileCreationForm()
 
-    return render(request, 'profile_registration.html',
-                  {'form': form})
+    return render(request, 'profile_registration.html', {'form': form})
+
+
+class ProfileList(ListView):
+    model = Profile
+    # context_object_name = 'profiles'
+    form_class = ProfileSearchForm
+    template_name = 'list_profiles.html'
+
+    def get_queryset(self):
+        search_string = self.request.GET.get("name", None)
+        query_set = Profile.objects.filter(Q(user__first_name__icontains=search_string) |
+                                           Q(user__last_name__icontains=search_string) |
+                                           Q(user__email__icontains=search_string)).all()
+
+        return query_set
+
+
+class Home(ListView):
+    model = Profile
+    template_name = "profile.html"
+    queryset = Profile.objects.all()
+    context_object_name = 'profile'
+
+    def get_context_data(self, **kwargs):
+        user = self.request.user
+        context = super(Home, self).get_context_data(**kwargs)
+        if hasattr(user, 'profile'):
+            profile = self.request.user.profile
+            context['wall_post_list'] = profile.wallpost_set.all()
+            context['form1'] = WallPostForm()
+            context['form2'] = CommentForm()
+            context['search_form'] = ProfileSearchForm()
+        return context
+
+
+def add_wall_post(request):
+    user = request.user
+    if request.method == "POST":
+        form = WallPostForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            wall_post = WallPost()
+            wall_post.author = user
+            wall_post.message = data['message']
+            wall_post.posted_to = user.profile
+            wall_post.posted_at = datetime.now()
+            wall_post.save()
+
+            return HttpResponseRedirect(reverse('home'))
+    else:
+        form = WallPostForm()
+
+    form1 = WallPostForm()
+    form2 = CommentForm()
+
+    return render(request, 'profile.html', {'form': form,
+                                            'form1': form1,
+                                            'form2': form2})
+
+
+def add_comment(request, wall_post_id):
+    user = request.user
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            comment = PostComment()
+            wall_post = WallPost.objects.get(pk=wall_post_id)
+            comment.author = user
+            comment.comment = data['comment']
+            comment.wall_post = wall_post
+            comment.posted_at = datetime.now()
+            comment.save()
+
+            return HttpResponseRedirect(reverse('home'))
+    else:
+        form = CommentForm()
+
+    form1 = WallPostForm()
+    form2 = CommentForm()
+
+    return render(request, 'profile.html', {'form': form,
+                                            'form1': form1,
+                                            'form2': form2})
+
+
+def upload_image(request):
+    user = request.user
+    if request.method == 'POST':
+        form = UploadImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = form.cleaned_data
+            image = Image()
+            image.profile = user.profile
+            image.image = data['image']
+            image.save()
+            # FileUploadHandler(request.FILES['image'])
+            # form.save()
+            return HttpResponseRedirect(reverse('profile',
+                                                args=[user.profile.id]))
+    else:
+        form = UploadImageForm()
+    return render_to_response('upload_image.html',
+                              RequestContext(request, {'form': form,
+                                                       'MEDIA_ROOT': MEDIA_ROOT}))
+
+
+class ViewImages(ListView):
+    model = Image
+    template_name = "view_images.html"
+    queryset = Image.objects.all()
+
 
 def login_redirect(request):
     user = request.user
@@ -39,13 +156,6 @@ def login_redirect(request):
                                             args=[user.profile.id]))
     else:
         return HttpResponseRedirect(reverse('home'))
-
-
-class Home(ListView):
-    model = Profile
-    template_name = "profile.html"
-    queryset = Profile.objects.all()
-    context_object_name = 'profile'
 
 
 class UpdateProfile(UpdateView):

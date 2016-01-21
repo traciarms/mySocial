@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}Update Profile{% endblock %}
+
+{% block content %}
+    <h1>Upload a photo to your account:</h1>
+    <form action="{% url 'upload_image' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.image }}
+        <br>
+        <input type="submit" value="Upload" />
+    </form>
+
+    <br><br>
+    <table>
+
+        <tr><td>
+        {% for image in user.profile.image_set.all %}
+                <tr><td>
+                <img src="{{ image.image.url }}" width="150"/><br>
+                <input type="submit" value="Make Profile Pic"><br><br>
+                </td></tr>
+        {% endfor %}
+    </table>
+    <br>
+{#    <a href="{% url 'profile' user.profile.id %}">Return to your profile.</a>#}
+{% endblock %}
