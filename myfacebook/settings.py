@@ -24,6 +24,7 @@ SECRET_KEY = '8j85!nb$st^x8@7of3c8b#09+7)%90v@i^eztp@n6sp^0=@fax'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -122,4 +123,5 @@ BOOTSTRAP3 = {
     'include_jquery': True,
 }
 
-MEDIA_ROOT = BASE_DIR
+MEDIA_ROOT = '/Users/traciarms/Bixly/sandbox/myfacebook'
+MEDIA_URL = '/media/'

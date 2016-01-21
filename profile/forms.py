@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from profile.models import Profile
+from profile.models import WallPost, PostComment, Image
 
 __author__ = 'traciarms'
 from django import forms
@@ -29,3 +29,34 @@ class ProfileForm(ModelForm):
         model = User
         fields = ('first_name', 'last_name', 'email', 'dob', 'gender', 'phone')
 
+
+class ProfileSearchForm(ModelForm):
+    name = forms.CharField(label="Search for other profiles:", max_length=250)
+
+    class Meta:
+        model = User
+        fields = ('name', )
+
+
+class WallPostForm(ModelForm):
+    message = forms.CharField(label='What\'s on your mind', max_length=250)
+
+    class Meta:
+        model = WallPost
+        fields = ('message', )
+
+
+class CommentForm(ModelForm):
+    comment = forms.CharField(label='Comment on this post', max_length=250)
+
+    class Meta:
+        model = PostComment
+        fields = ('comment', )
+
+
+class UploadImageForm(forms.Form):
+    image = forms.ImageField()
+
+    class Meta:
+        model = Image
+        fields = ('image', )
