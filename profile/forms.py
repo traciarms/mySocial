@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from profile.models import WallPost, PostComment, Image
+from profile.models import WallPost, PostComment, Image, Profile
 
 __author__ = 'traciarms'
 from django import forms
@@ -60,3 +60,11 @@ class UploadImageForm(forms.Form):
     class Meta:
         model = Image
         fields = ('image', )
+
+
+class UpdateProfileImgForm(ModelForm):
+    image_id = forms.IntegerField()
+
+    class Meta:
+        model = Profile
+        fields = ('image_id', )

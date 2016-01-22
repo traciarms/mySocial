@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+    <div id="header">
+        <h1 class="title">My Facebook</h1>
+        <a href="{% url 'profile' user.profile.id %}">Return to your profile.</a>
+        {% if user.is_authenticated %}
+            <center>
+                <form name="search_form" action="{% url 'list_profiles' %}" method="get">
+                    {% csrf_token %}
+                    {{ search_form.as_p }}
+                    <input type="submit" name="submit" value="Search">
+                </form>
+
+            </center>
+
+            <h1>Welcome to {{ profile.user.first_name }} {{ profile.user.last_name }}'s page:</h1>
+
+            <form name="form1" action="{% url 'add_wall_post' profile.id %}" method="post">
+                {% csrf_token %}
+                {{ form1.as_p }}
+                <input type="hidden" name="forward_template" value='other_profile'>
+                <input type="submit" name="submit" value="Submit Wall Post">
+            </form><br>
+
+            <h2>Your Wall Posts:</h2>
+            {% for wall_post in wall_post_list %}
+                <table bgcolor="#d8bfd8">
+                    <tr><td>
+                        <h3>{{ wall_post.message }}</h3>
+                        {% for comment in wall_post.postcomment_set.all %}
+                            <li>{{ comment.comment }}<br>
+                                [ author:{{ comment.author.first_name }}
+                                         {{ comment.author.last_name }}
+                                  posted at: {{ comment.posted_at }} ]
+                            </li>
+                        {% endfor %}
+                    </td></tr>
+                    <tr>
+                        <td>
+                        <form name="form2" action="{% url 'add_comment' wall_post.id %}" method="post">
+                            {% csrf_token %}
+
+                                {{ form2.as_p }}
+                                <input type="hidden" name="forward_template" value='other_profile'>
+                                <input type="submit" name="submit" value="Add Comment">
+                        </form>
+                        </td>
+                    </tr>
+                    <tr bgcolor="white"><td></td></tr>
+                </table>
+            {% endfor %}
+
+        {% else %}
+            <a href="{% url 'login' %}">Login</a> if you already have an account.<br>
+            OR <a href="{% url 'register' %}">Register</a> if you need a new account.
+
+        {% endif %}
+    </div>
+
+</body>
+</html>
+
+
