@@ -1,5 +1,4 @@
 from django.contrib.auth import authenticate, login
-from django.core.files.uploadhandler import FileUploadHandler
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
@@ -7,7 +6,6 @@ from django.shortcuts import render, get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils.datetime_safe import datetime
 from django.views.generic import ListView, UpdateView
-from myfacebook.settings import MEDIA_ROOT
 from profile.forms import ProfileCreationForm, ProfileForm, UploadImageForm, \
     CommentForm, WallPostForm, ProfileSearchForm, UpdateProfileImgForm
 from profile.models import Profile, Image, WallPost, PostComment
