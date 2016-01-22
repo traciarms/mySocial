@@ -9,26 +9,31 @@
 
     <div id="header">
         <h1 class="title">My Facebook</h1>
-        <center>
-            <form name="search_form" action="{% url 'list_profiles' %}" method="get">
-                {% csrf_token %}
-                {{ search_form.as_p }}
-                <input type="submit" name="submit" value="Search">
-            </form>
-
-        </center>
         {% if user.is_authenticated %}
-            <h1>Hi {{ user.first_name }}, welcome myFacebook:</h1>
+            <center>
+                <form name="search_form" action="{% url 'list_profiles' %}" method="get">
+                    {% csrf_token %}
+                    {{ search_form.as_p }}
+                    <input type="submit" name="submit" value="Search">
+                </form>
+
+            </center>
+            <h1>
+            {% if user.profile.profile_thumbnail != None %}
+                <img src="{{ user.profile.profile_thumbnail.url }}" width="100">
+            {% endif %}
+            Hi {{ user.first_name }}, welcome to your myFacebook account:</h1>
             You can: <br>
             <a href="{% url 'update_profile' user.profile.id %}">Update your account.</a><br>
-            <a href="{% url 'upload_image' %}">Upload photos to your account.</a><br>
+            <a href="{% url 'upload_image' %}">Upload photos to your account OR set your profile picture.</a><br>
             <a href="{% url 'view_images' %}">View photos uploaded to your account.</a>
             <br><br>
             <hr>
             <br><br>
-            <form name="form1" action="{% url 'add_wall_post' %}" method="post">
+            <form name="form1" action="{% url 'add_wall_post' user.profile.id %}" method="post">
                 {% csrf_token %}
                 {{ form1.as_p }}
+                <input type="hidden" name="forward_template" value='home'>
                 <input type="submit" name="submit" value="Submit Wall Post">
             </form><br>
 
@@ -39,7 +44,10 @@
                         <h3>{{ wall_post.message }}</h3>
                         {% for comment in wall_post.postcomment_set.all %}
                             <li>{{ comment.comment }}<br>
-                                [ author:{{ comment.author }} posted at: {{ comment.posted_at }} ]</li>
+                                [ author:{{ comment.author.first_name }}
+                                         {{ comment.author.last_name }}
+                                  posted at: {{ comment.posted_at }} ]
+                            </li>
                         {% endfor %}
                     </td></tr>
                     <tr>
@@ -48,6 +56,7 @@
                             {% csrf_token %}
 
                                 {{ form2.as_p }}
+                                <input type="hidden" name="forward_template" value='home'>
                                 <input type="submit" name="submit" value="Add Comment">
                         </form>
                         </td>

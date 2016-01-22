@@ -9,10 +9,19 @@ from django.utils.datetime_safe import datetime
 from django.views.generic import ListView, UpdateView
 from myfacebook.settings import MEDIA_ROOT
 from profile.forms import ProfileCreationForm, ProfileForm, UploadImageForm, \
-    CommentForm, WallPostForm, ProfileSearchForm
+    CommentForm, WallPostForm, ProfileSearchForm, UpdateProfileImgForm
 from profile.models import Profile, Image, WallPost, PostComment
 
 __author__ = 'traciarms'
+
+
+def login_redirect(request):
+    user = request.user
+    if hasattr(user, 'profile') and user.profile.id > 0:
+        return HttpResponseRedirect(reverse('profile',
+                                            args=[user.profile.id]))
+    else:
+        return HttpResponseRedirect(reverse('home'))
 
 
 def create_user(request):
@@ -40,7 +49,6 @@ def create_user(request):
 
 class ProfileList(ListView):
     model = Profile
-    # context_object_name = 'profiles'
     form_class = ProfileSearchForm
     template_name = 'list_profiles.html'
 
@@ -71,20 +79,26 @@ class Home(ListView):
         return context
 
 
-def add_wall_post(request):
-    user = request.user
+def add_wall_post(request, profile_id):
     if request.method == "POST":
         form = WallPostForm(request.POST)
+        forward_template = form.data.get('forward_template')
         if form.is_valid():
+            user = request.user
+            profile = Profile.objects.get(pk=profile_id)
             data = form.cleaned_data
             wall_post = WallPost()
             wall_post.author = user
             wall_post.message = data['message']
-            wall_post.posted_to = user.profile
+            wall_post.posted_to = profile
             wall_post.posted_at = datetime.now()
             wall_post.save()
 
-            return HttpResponseRedirect(reverse('home'))
+            if 'home' not in forward_template:
+                return HttpResponseRedirect(reverse(forward_template,
+                                                    args=[profile.id]))
+            else:
+                return HttpResponseRedirect(reverse('home'))
     else:
         form = WallPostForm()
 
@@ -98,19 +112,26 @@ def add_wall_post(request):
 
 def add_comment(request, wall_post_id):
     user = request.user
+    wall_post = WallPost.objects.get(pk=wall_post_id)
+    profile = Profile.objects.get(wallpost=wall_post)
     if request.method == "POST":
         form = CommentForm(request.POST)
+        forward_template = form.data.get('forward_template')
         if form.is_valid():
             data = form.cleaned_data
             comment = PostComment()
-            wall_post = WallPost.objects.get(pk=wall_post_id)
+
             comment.author = user
             comment.comment = data['comment']
             comment.wall_post = wall_post
             comment.posted_at = datetime.now()
             comment.save()
 
-            return HttpResponseRedirect(reverse('home'))
+            if 'home' not in forward_template:
+                return HttpResponseRedirect(reverse(forward_template,
+                                                    args=[profile.id]))
+            else:
+                return HttpResponseRedirect(reverse('home'))
     else:
         form = CommentForm()
 
@@ -132,15 +153,30 @@ def upload_image(request):
             image.profile = user.profile
             image.image = data['image']
             image.save()
-            # FileUploadHandler(request.FILES['image'])
-            # form.save()
             return HttpResponseRedirect(reverse('profile',
                                                 args=[user.profile.id]))
     else:
         form = UploadImageForm()
     return render_to_response('upload_image.html',
-                              RequestContext(request, {'form': form,
-                                                       'MEDIA_ROOT': MEDIA_ROOT}))
+                              RequestContext(request, {'form': form}))
+
+
+def update_profile_image(request):
+    user = request.user
+    if request.method == 'POST':
+        form = UpdateProfileImgForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            image = Image.objects.get(pk=data['image_id'])
+            profile = user.profile
+            profile.profile_thumbnail = image.image.url
+            profile.save()
+            return HttpResponseRedirect(reverse('profile',
+                                                args=[user.profile.id]))
+    else:
+        form = UploadImageForm()
+    return render_to_response('upload_image.html',
+                              RequestContext(request, {'form': form}))
 
 
 class ViewImages(ListView):
@@ -149,13 +185,24 @@ class ViewImages(ListView):
     queryset = Image.objects.all()
 
 
-def login_redirect(request):
-    user = request.user
-    if hasattr(user, 'profile') and user.profile.id > 0:
-        return HttpResponseRedirect(reverse('profile',
-                                            args=[user.profile.id]))
-    else:
-        return HttpResponseRedirect(reverse('home'))
+class ViewOtherProfile(ListView):
+    model = Profile
+    template_name = "other_profile.html"
+    pk_url_kwarg = 'profile_id'
+
+    def get_context_data(self, **kwargs):
+        profile = get_object_or_404(Profile, pk=self.kwargs['profile_id'])
+        context = super(ViewOtherProfile, self).get_context_data(**kwargs)
+        context['wall_post_list'] = profile.wallpost_set.all()
+        context['form1'] = WallPostForm()
+        context['form2'] = CommentForm()
+        context['search_form'] = ProfileSearchForm()
+        context['profile'] = profile
+        return context
+
+    def get_success_url(self):
+        profile = get_object_or_404(Profile, pk=self.kwargs['profile_id'])
+        return reverse('other_profile', kwargs={'profile_id': profile.id})
 
 
 class UpdateProfile(UpdateView):
@@ -182,4 +229,27 @@ class UpdateProfile(UpdateView):
         return {'first_name': profile.user.first_name,
                 'last_name': profile.user.last_name,
                 'email': profile.user.email}
+
+
+# class UpdateProfileImage(UpdateView):
+#     model = Profile
+#     form_class = UpdateProfileImgForm
+#     pk_url_kwarg = 'profile_id'
+#     template_name = "upload_image.html"
+#
+#     def form_valid(self, form):
+#         profile = get_object_or_404(Profile, pk=self.kwargs['profile_id'])
+#         user_profile_form = form.UpdateProfileImgForm(self.request.POST, self.request.FILES)
+#         image_selected = user_profile_form.base_fields.get('profile_thumbnail', None)
+#         profile.profile_thumbnail = image_selected
+#         profile.save()
+#         return super(UpdateProfileImage, self).form_valid(form)
+#
+#     def form_invalid(self, form):
+#         foo = 'bar'
+#         pass
+#
+#     def get_success_url(self):
+#         profile = get_object_or_404(Profile, pk=self.kwargs['profile_id'])
+#         return reverse('profile', kwargs={'profile_id': profile.id})
 

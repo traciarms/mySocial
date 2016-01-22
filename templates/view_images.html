@@ -6,7 +6,8 @@
 {% block content %}
     <h1>Here are your account photos:</h1>
     {% for image in image_list %}
-        <li>{{ image.url }}</li>
+        <li><img name="image"  src="{{ image.image.url }}" width="150"/>
+        </li>
 
     {% endfor %}
     <br>
