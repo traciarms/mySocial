@@ -23,21 +23,23 @@
                 <img src="{{ user.profile.profile_thumbnail.url }}" width="100">
             {% endif %}
             Hi {{ user.first_name }}, welcome to your myFacebook account:</h1>
-            You can: <br>
+{#            <a href="{% url 'upload_image' %}">Click here to change your profile picture</a><br><br>#}
+            <br>
+            <h3>You can:</h3>
             <a href="{% url 'update_profile' user.profile.id %}">Update your account.</a><br>
-            <a href="{% url 'upload_image' %}">Upload photos to your account OR set your profile picture.</a><br>
+            <a href="{% url 'upload_image' %}">Upload photos to your account OR change your profile picture.</a><br>
             <a href="{% url 'view_images' %}">View photos uploaded to your account.</a>
             <br><br>
             <hr>
             <br><br>
             <form name="form1" action="{% url 'add_wall_post' user.profile.id %}" method="post">
                 {% csrf_token %}
-                {{ form1.as_p }}
+                <h2>{{ form1.as_p }}</h2>
                 <input type="hidden" name="forward_template" value='home'>
                 <input type="submit" name="submit" value="Submit Wall Post">
             </form><br>
 
-            <h2>Your Wall Posts:</h2>
+            <h3>Your Wall Posts:</h3>
             {% for wall_post in wall_post_list %}
                 <table bgcolor="#d8bfd8">
                     <tr><td>
