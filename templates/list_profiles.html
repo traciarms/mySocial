@@ -4,10 +4,16 @@
 {% block title %}Profile list{% endblock %}
 
 {% block content %}
-    <h1>Here are the profiles we found:</h1>
+    <h1>Here are the profiles we found matching your search:</h1>
     {% for profile in profile_list %}
-        <a href="{% url 'profile' profile.id %}">
-            {{ profile.user.first_name }} {{ profile.user.last_name }}</a>
+        {% if profile.user != user %}
+            <a href="{% url 'other_profile' profile.id %}">
+                {{ profile.user.first_name }} {{ profile.user.last_name }}
+            </a>
+            <br>
+        {% endif %}
     {% endfor %}
 
+    <br>
+    <a href="{% url 'profile' user.profile.id %}">Return to your profile.</a>
 {% endblock %}

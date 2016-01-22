@@ -4,25 +4,35 @@
 {% block title %}Update Profile{% endblock %}
 
 {% block content %}
+    <style>
+        label{border: 2px solid transparent}
+        input[type=radio] {display:none;}
+        input:checked + label {border:2px solid #003366;}
+    </style>
     <h1>Upload a photo to your account:</h1>
-    <form action="{% url 'upload_image' %}" method="post" enctype="multipart/form-data">
+    <form name='form1' action="{% url 'upload_image' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.image }}
         <br>
         <input type="submit" value="Upload" />
     </form>
 
-    <br><br>
-    <table>
-
-        <tr><td>
-        {% for image in user.profile.image_set.all %}
-                <tr><td>
-                <img src="{{ image.image.url }}" width="150"/><br>
-                <input type="submit" value="Make Profile Pic"><br><br>
-                </td></tr>
-        {% endfor %}
-    </table>
+    <form name='form2' action="{% url 'update_profile_image' %}" method="post">
+        {% csrf_token %}
+        <br><br>
+        <table>
+            Click the image to select.
+            <tr><td>
+            {% for image in user.profile.image_set.all %}
+                <input id="img{{ image.id }}" name="image_id" value="{{ image.id }}" type="radio">
+                <label for="img{{ image.id }}">
+                    <img src="{{ image.image.url }}" width="150"/>
+                </label>
+            {% endfor %}
+            </td></tr>
+        </table>
+        <input type="submit" name="submit" value="Change Profile Photo" />
+    </form>
     <br>
-{#    <a href="{% url 'profile' user.profile.id %}">Return to your profile.</a>#}
+    <a href="{% url 'profile' user.profile.id %}">Return to your profile.</a>
 {% endblock %}
