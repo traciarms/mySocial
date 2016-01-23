@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+{% extends 'thirdauth/base.html' %}
+{% block main %}
 
     <div id="header">
         <h1 class="title">My Facebook</h1>
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and user.profile %}
+            <a href="{% url 'logout' %}">Logout</a>
             <center>
                 <form name="search_form" action="{% url 'list_profiles' %}" method="get">
                     {% csrf_token %}
@@ -19,16 +14,19 @@
 
             </center>
             <h1>
-            {% if user.profile.profile_thumbnail != None %}
-                <img src="{{ user.profile.profile_thumbnail.url }}" width="100">
+            {% if user.profile.profile_thumbnail != '' %}
+                <a href="{% url 'upload_image' %}">
+                    <img src="{{ user.profile.profile_thumbnail.url }}" width="100">
+                </a>
             {% endif %}
             Hi {{ user.first_name }}, welcome to your myFacebook account:</h1>
-{#            <a href="{% url 'upload_image' %}">Click here to change your profile picture</a><br><br>#}
             <br>
             <h3>You can:</h3>
-            <a href="{% url 'update_profile' user.profile.id %}">Update your account.</a><br>
+            <a class="btn btn-info" href="{% url 'update_profile' user.profile.id %}">Update your account.</a><br>
             <a href="{% url 'upload_image' %}">Upload photos to your account OR change your profile picture.</a><br>
-            <a href="{% url 'view_images' %}">View photos uploaded to your account.</a>
+            {% if user.profile.image_set|length > 0 %}
+                <a href="{% url 'view_images' %}">View photos uploaded to your account.</a>
+            {% endif %}
             <br><br>
             <hr>
             <br><br>
@@ -39,16 +37,20 @@
                 <input type="submit" name="submit" value="Submit Wall Post">
             </form><br>
 
-            <h3>Your Wall Posts:</h3>
+            {% if wall_post_list|length > 0 %}
+                <h3>Your Wall Posts:</h3>
+            {% endif %}
             {% for wall_post in wall_post_list %}
                 <table bgcolor="#d8bfd8">
                     <tr><td>
                         <h3>{{ wall_post.message }}</h3>
                         {% for comment in wall_post.postcomment_set.all %}
                             <li>{{ comment.comment }}<br>
-                                [ author:{{ comment.author.first_name }}
-                                         {{ comment.author.last_name }}
-                                  posted at: {{ comment.posted_at }} ]
+                                <font size="2">
+                                    [ author:{{ comment.author.first_name }}
+                                             {{ comment.author.last_name }}
+                                    posted at: {{ comment.posted_at }} ]<br><br>
+                                </font>
                             </li>
                         {% endfor %}
                     </td></tr>
@@ -67,14 +69,24 @@
                 </table>
             {% endfor %}
 
+        {#if the user is authenticated but doesn't have  profile yet#}
+        {% elif user.is_authenticated and not user.profile %}
+            <a href="{% url 'register' %}">
+                GREAT!  You are logged in.  Now register your account to myFacebook.
+            </a>
+
+        {# if the user is not authenticated - ask them to login or register#}
         {% else %}
+
+               <a href="{% url 'social:begin' 'facebook' %}?next={{ request.path }}">
+                <img src="http://developers.facebook.com/images/devsite/login-button.png"/>
+               </a><br>
             <a href="{% url 'login' %}">Login</a> if you already have an account.<br>
             OR <a href="{% url 'register' %}">Register</a> if you need a new account.
 
         {% endif %}
     </div>
+{% endblock %}
 
-</body>
-</html>
 
 

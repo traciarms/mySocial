@@ -27,20 +27,38 @@ def create_user(request):
         form = ProfileCreationForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            user = form.save()
+            if request.user.is_authenticated():
+                user = request.user
+                user.backend = 'django.contrib.auth.backends.ModelBackend'
+                # username = request.POST['username']
+                # password = request.POST['password1']
+                # user = authenticate(username=username, password=password)
+                # user.authenticate()
+            else:
+                user = form.save()
             profile = Profile()
             profile.user = user
+            user.email = data['email']
             profile.dob = data['dob']
             profile.gender = data['gender']
             profile.phone = data['phone']
             profile.save()
+            user.save()
             user = authenticate(username=request.POST['username'],
                                 password=request.POST['password1'])
             login(request, user)
 
             return HttpResponseRedirect(reverse('home'))
     else:
-        form = ProfileCreationForm()
+        if request.user:
+            user = request.user
+            context = {}
+            context['username'] = user.username
+            context['first_name'] = user.first_name
+            context['last_name'] = user.last_name
+            context['email'] = user.email
+
+        form = ProfileCreationForm(context)
 
     return render(request, 'profile_registration.html', {'form': form})
 
@@ -151,8 +169,7 @@ def upload_image(request):
             image.profile = user.profile
             image.image = data['image']
             image.save()
-            return HttpResponseRedirect(reverse('profile',
-                                                args=[user.profile.id]))
+            return HttpResponseRedirect(reverse('upload_image'))
     else:
         form = UploadImageForm()
     return render_to_response('upload_image.html',
@@ -227,27 +244,3 @@ class UpdateProfile(UpdateView):
         return {'first_name': profile.user.first_name,
                 'last_name': profile.user.last_name,
                 'email': profile.user.email}
-
-
-# class UpdateProfileImage(UpdateView):
-#     model = Profile
-#     form_class = UpdateProfileImgForm
-#     pk_url_kwarg = 'profile_id'
-#     template_name = "upload_image.html"
-#
-#     def form_valid(self, form):
-#         profile = get_object_or_404(Profile, pk=self.kwargs['profile_id'])
-#         user_profile_form = form.UpdateProfileImgForm(self.request.POST, self.request.FILES)
-#         image_selected = user_profile_form.base_fields.get('profile_thumbnail', None)
-#         profile.profile_thumbnail = image_selected
-#         profile.save()
-#         return super(UpdateProfileImage, self).form_valid(form)
-#
-#     def form_invalid(self, form):
-#         foo = 'bar'
-#         pass
-#
-#     def get_success_url(self):
-#         profile = get_object_or_404(Profile, pk=self.kwargs['profile_id'])
-#         return reverse('profile', kwargs={'profile_id': profile.id})
-
