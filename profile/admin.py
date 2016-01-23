@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.contrib.auth.models import User
 from profile.models import Profile, Image, WallPost, PostComment
 
 __author__ = 'traciarms'

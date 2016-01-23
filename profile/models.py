@@ -15,7 +15,7 @@ class Profile(models.Model):
     dob = models.CharField(max_length=10)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES,
                               verbose_name='Gender')
-    phone = models.CharField(max_length=10)
+    phone = models.CharField(max_length=15)
     profile_thumbnail = models.ImageField(null=True)
 
     def __str__(self):
