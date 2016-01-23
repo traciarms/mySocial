@@ -17,22 +17,24 @@
         <input type="submit" value="Upload" />
     </form>
 
-    <form name='form2' action="{% url 'update_profile_image' %}" method="post">
-        {% csrf_token %}
-        <br><br>
-        <table>
-            Click the image to select.
-            <tr><td>
-            {% for image in user.profile.image_set.all %}
-                <input id="img{{ image.id }}" name="image_id" value="{{ image.id }}" type="radio">
-                <label for="img{{ image.id }}">
-                    <img src="{{ image.image.url }}" width="150"/>
-                </label>
-            {% endfor %}
-            </td></tr>
-        </table>
-        <input type="submit" name="submit" value="Change Profile Photo" />
-    </form>
+    {% if user.profile.image_set.all|length > 0 %}
+        <form name='form2' action="{% url 'update_profile_image' %}" method="post">
+            {% csrf_token %}
+            <br><br>
+            <table>
+                Click the image to select.
+                <tr><td>
+                {% for image in user.profile.image_set.all %}
+                    <input id="img{{ image.id }}" name="image_id" value="{{ image.id }}" type="radio">
+                    <label for="img{{ image.id }}">
+                        <img src="{{ image.image.url }}" width="150"/>
+                    </label>
+                {% endfor %}
+                </td></tr>
+            </table>
+            <input type="submit" name="submit" value="Change Profile Photo" />
+        </form>
+    {% endif %}
     <br>
     <a href="{% url 'profile' user.profile.id %}">Return to your profile.</a>
 {% endblock %}

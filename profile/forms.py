@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 class ProfileCreationForm(UserCreationForm):
     dob = forms.CharField(max_length=10)
     gender = forms.CharField(max_length=1)
-    phone = forms.CharField(max_length=10)
+    phone = forms.CharField(max_length=15)
 
     class Meta:
         model = User
@@ -23,7 +23,7 @@ class ProfileForm(ModelForm):
     email = forms.EmailField()
     dob = forms.CharField(max_length=10)
     gender = forms.CharField(max_length=1)
-    phone = forms.CharField(max_length=10)
+    phone = forms.CharField(max_length=15)
 
     class Meta:
         model = User
