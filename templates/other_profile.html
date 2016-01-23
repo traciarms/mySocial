@@ -19,7 +19,7 @@
                 </form>
 
             </center><h1>
-            {% if profile.profile_thumbnail != 'None' %}
+            {% if profile.profile_thumbnail != '' %}
                 <img src="{{ profile.profile_thumbnail.url }}" width="100">
             {% endif %}
             Welcome to {{ profile.user.first_name }} {{ profile.user.last_name }}'s page:</h1>
@@ -33,16 +33,20 @@
                 </h2>
             </form><br>
 
-            <h3>Your Wall Posts:</h3>
+            {% if wall_post_list|length > 0 %}
+                <h3>Your Wall Posts:</h3>
+            {% endif %}
             {% for wall_post in wall_post_list %}
                 <table bgcolor="#d8bfd8">
                     <tr><td>
                         <h3>{{ wall_post.message }}</h3>
                         {% for comment in wall_post.postcomment_set.all %}
                             <li>{{ comment.comment }}<br>
-                                [ author:{{ comment.author.first_name }}
-                                         {{ comment.author.last_name }}
-                                  posted at: {{ comment.posted_at }} ]
+                                <font size="2">
+                                    [ author:{{ comment.author.first_name }}
+                                             {{ comment.author.last_name }}
+                                      posted at: {{ comment.posted_at }} ]<br><br>
+                                </font>
                             </li>
                         {% endfor %}
                     </td></tr>

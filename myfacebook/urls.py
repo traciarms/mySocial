@@ -16,12 +16,19 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from profile.views import Home
-from django.conf.urls import include, url
+from django.conf.urls import include, url, patterns
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
+admin.autodiscover()
+
+urlpatterns = patterns('',
+   url(r'^$', 'profile.views.home', name='home'),
+   url(r'^admin/', include(admin.site.urls)),
+)
 
 urlpatterns = [
+    url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^profile/', include('profile.urls'), name='create_user'),
     url(r'^$', Home.as_view(), name='home'),
     url(r'^admin/', include(admin.site.urls)),
