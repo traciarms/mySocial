@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
@@ -30,10 +31,6 @@ def create_user(request):
             if request.user.is_authenticated():
                 user = request.user
                 user.backend = 'django.contrib.auth.backends.ModelBackend'
-                # username = request.POST['username']
-                # password = request.POST['password1']
-                # user = authenticate(username=username, password=password)
-                # user.authenticate()
             else:
                 user = form.save()
             profile = Profile()
@@ -94,7 +91,7 @@ class Home(ListView):
             context['search_form'] = ProfileSearchForm()
         return context
 
-
+@login_required
 def add_wall_post(request, profile_id):
     if request.method == "POST":
         form = WallPostForm(request.POST)
@@ -125,7 +122,7 @@ def add_wall_post(request, profile_id):
                                             'form1': form1,
                                             'form2': form2})
 
-
+@login_required
 def add_comment(request, wall_post_id):
     user = request.user
     wall_post = WallPost.objects.get(pk=wall_post_id)
@@ -158,7 +155,7 @@ def add_comment(request, wall_post_id):
                                             'form1': form1,
                                             'form2': form2})
 
-
+@login_required
 def upload_image(request):
     user = request.user
     if request.method == 'POST':
@@ -175,7 +172,7 @@ def upload_image(request):
     return render_to_response('upload_image.html',
                               RequestContext(request, {'form': form}))
 
-
+@login_required
 def update_profile_image(request):
     user = request.user
     if request.method == 'POST':
