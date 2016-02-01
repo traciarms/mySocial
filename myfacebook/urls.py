@@ -13,6 +13,8 @@ Including another URLconf
     1. Add an import:  from blog import urls as blog_urls
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
+import social
+import profile
 from django.conf import settings
 from django.conf.urls.static import static
 from profile.views import Home
@@ -22,18 +24,19 @@ from django.contrib.auth import views as auth_views
 
 admin.autodiscover()
 
-urlpatterns = patterns('',
-   url(r'^$', 'profile.views.home', name='home'),
-   url(r'^admin/', include(admin.site.urls)),
-)
+# urlpatterns = patterns('',
+#    url(r'^$', profile.views.home, name='home'),
+#
+# )
 
 urlpatterns = [
-    url('', include('social.apps.django_app.urls', namespace='social')),
-    url(r'^profile/', include('profile.urls'), name='create_user'),
+    url(r'^admin/', include(admin.site.urls)),
     url(r'^$', Home.as_view(), name='home'),
+    url('', include(social.apps.django_app.urls, namespace='social')),
+    url(r'^profile/', include('profile.urls'), name='create_user'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^logout/', auth_views.logout, {'next_page': '/'}, name='logout'),
-    url(r'^login_redirect/', 'profile.views.login_redirect', name='login_redirect'),
+    url(r'^login_redirect/', profile.views.login_redirect, name='login_redirect'),
     url(r'^profile/(?P<profile_id>[0-9]+)/', Home.as_view(), name='profile'),
     url(r'^login/', auth_views.login,
         {'extra_context': {'next': '/'}}, name='login'),

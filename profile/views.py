@@ -1,9 +1,10 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404, render_to_response
+from django.shortcuts import render, get_object_or_404, render_to_response, \
+    redirect
 from django.template import RequestContext
 from django.utils.datetime_safe import datetime
 from django.views.generic import ListView, UpdateView
@@ -20,7 +21,9 @@ def login_redirect(request):
         return HttpResponseRedirect(reverse('profile',
                                             args=[user.profile.id]))
     else:
-        return HttpResponseRedirect(reverse('home'))
+        print 'this user doesnt have a profile logout them out and redirect to the login page'
+        logout(request)
+        return HttpResponseRedirect(reverse('login'))
 
 
 def create_user(request):
@@ -90,6 +93,14 @@ class Home(ListView):
             context['form2'] = CommentForm()
             context['search_form'] = ProfileSearchForm()
         return context
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not hasattr(user, 'profile'):
+            print 'this user has no profile - redirect them to create one'
+            # logout(request)
+
+            return redirect('register')
 
 @login_required
 def add_wall_post(request, profile_id):

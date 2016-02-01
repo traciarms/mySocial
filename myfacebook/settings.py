@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'profile',
     'bootstrap3',
     'social.apps.django_app.default',
+    'social.apps.django_app.urls',
 )
 
 MIDDLEWARE_CLASSES = (
