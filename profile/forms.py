@@ -6,15 +6,12 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-class ProfileCreationForm(UserCreationForm):
-    dob = forms.CharField(max_length=10)
-    gender = forms.CharField(max_length=1)
-    phone = forms.CharField(max_length=15)
+
+class UserCreationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'dob',
-                  'gender', 'phone')
+        fields = ('username', 'first_name', 'last_name', 'email')
 
 
 class ProfileForm(ModelForm):
@@ -63,7 +60,8 @@ class UploadImageForm(forms.Form):
 
 
 class UpdateProfileImgForm(ModelForm):
-    image_id = forms.IntegerField()
+    image_id = forms.IntegerField(required=True, error_messages={'required': 'Please click on an image to select '
+                                                                             'and then click Change Profile Photo button.'})
 
     class Meta:
         model = Profile

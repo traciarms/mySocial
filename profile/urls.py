@@ -11,6 +11,8 @@ urlpatterns = [
 
     url(r'^register/', profile.views.create_user, name='register'),
 
+    # url(r'^create_profile', profile.views.create_profile, name='create_profile'),
+
     url(r'^update_profile/(?P<profile_id>[0-9]+)/',
         login_required(UpdateProfile.as_view()), name='update_profile'),
 

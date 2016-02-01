@@ -1,15 +1,17 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404, render_to_response, \
-    redirect
+from django.shortcuts import render, get_object_or_404, render_to_response
 from django.template import RequestContext
 from django.utils.datetime_safe import datetime
 from django.views.generic import ListView, UpdateView
-from profile.forms import ProfileCreationForm, ProfileForm, UploadImageForm, \
-    CommentForm, WallPostForm, ProfileSearchForm, UpdateProfileImgForm
+
+from profile.forms import ProfileForm, UploadImageForm, \
+    CommentForm, WallPostForm, ProfileSearchForm, UpdateProfileImgForm, \
+    UserCreationForm
 from profile.models import Profile, Image, WallPost, PostComment
 
 __author__ = 'traciarms'
@@ -21,14 +23,12 @@ def login_redirect(request):
         return HttpResponseRedirect(reverse('profile',
                                             args=[user.profile.id]))
     else:
-        print 'this user doesnt have a profile logout them out and redirect to the login page'
         logout(request)
         return HttpResponseRedirect(reverse('login'))
 
-
 def create_user(request):
     if request.method == "POST":
-        form = ProfileCreationForm(request.POST)
+        form = UserCreationForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             if request.user.is_authenticated():
@@ -37,11 +37,8 @@ def create_user(request):
             else:
                 user = form.save()
             profile = Profile()
-            profile.user = user
+            user.profile = profile
             user.email = data['email']
-            profile.dob = data['dob']
-            profile.gender = data['gender']
-            profile.phone = data['phone']
             profile.save()
             user.save()
             user = authenticate(username=request.POST['username'],
@@ -50,17 +47,17 @@ def create_user(request):
 
             return HttpResponseRedirect(reverse('home'))
     else:
-        if request.user:
+        context = {}
+        if request.user and not isinstance(request.user, AnonymousUser):
             user = request.user
-            context = {}
             context['username'] = user.username
             context['first_name'] = user.first_name
             context['last_name'] = user.last_name
             context['email'] = user.email
 
-        form = ProfileCreationForm(context)
+        form = UserCreationForm(initial=context)
 
-    return render(request, 'profile_registration.html', {'form': form})
+    return render(request, 'user_registration.html', {'form': form})
 
 
 class ProfileList(ListView):
@@ -93,14 +90,6 @@ class Home(ListView):
             context['form2'] = CommentForm()
             context['search_form'] = ProfileSearchForm()
         return context
-
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        if not hasattr(user, 'profile'):
-            print 'this user has no profile - redirect them to create one'
-            # logout(request)
-
-            return redirect('register')
 
 @login_required
 def add_wall_post(request, profile_id):

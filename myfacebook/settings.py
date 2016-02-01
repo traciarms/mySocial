@@ -146,5 +146,5 @@ BOOTSTRAP3 = {
     'include_jquery': True,
 }
 
-MEDIA_ROOT = '/Users/traciarms/Bixly/sandbox/myfacebook'
+MEDIA_ROOT = BASE_DIR
 MEDIA_URL = '/media/'

@@ -9,6 +9,9 @@
         {% for profile in profile_list %}
             {% if profile.user != user %}
                 <a href="{% url 'other_profile' profile.id %}">
+                    {% if profile.profile_thumbnail %}
+                        <img name="image"  src="{{ profile.profile_thumbnail.url }}" width="50"/>
+                    {% endif %}
                     {{ profile.user.first_name }} {{ profile.user.last_name }}
                 </a>
                 <br>

@@ -23,6 +23,7 @@
             <br><br>
             <table>
                 Click the image to select.
+                {{ form.image_id.errors }}
                 <tr><td>
                 {% for image in user.profile.image_set.all %}
                     <input id="img{{ image.id }}" name="image_id" value="{{ image.id }}" type="radio">
