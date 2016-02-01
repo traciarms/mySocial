@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import AnonymousUser, User
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect
@@ -58,6 +58,26 @@ def create_user(request):
         form = UserCreationForm(initial=context)
 
     return render(request, 'user_registration.html', {'form': form})
+
+
+def save_profile(backend, user, response, *args, **kwargs):
+    if backend.name == 'facebook':
+        has_profile = hasattr(user, 'profile')
+
+        if not has_profile:
+            profile = Profile(user_id=user.id)
+            profile.save()
+            user.profile = profile
+            user.email = response.get('email')
+            user.save()
+    # if backend.name == 'facebook':
+    #     if not hasattr(user, 'profile'):
+    #         profile = Profile()
+    #         profile.user = user
+    #         profile.save()
+    #         user.profile = profile
+    #         user.email = response.get('email')
+    #         user.save()
 
 
 class ProfileList(ListView):
