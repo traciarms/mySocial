@@ -67,17 +67,7 @@ def save_profile(backend, user, response, *args, **kwargs):
         if not has_profile:
             profile = Profile(user_id=user.id)
             profile.save()
-            user.profile = profile
-            user.email = response.get('email')
             user.save()
-    # if backend.name == 'facebook':
-    #     if not hasattr(user, 'profile'):
-    #         profile = Profile()
-    #         profile.user = user
-    #         profile.save()
-    #         user.profile = profile
-    #         user.email = response.get('email')
-    #         user.save()
 
 
 class ProfileList(ListView):
@@ -110,6 +100,12 @@ class Home(ListView):
             context['form2'] = CommentForm()
             context['search_form'] = ProfileSearchForm()
         return context
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if user.is_authenticated() and not hasattr(user, 'profile'):
+            logout(request)
+            return HttpResponseRedirect(reverse('login'))
 
 @login_required
 def add_wall_post(request, profile_id):

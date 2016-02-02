@@ -24,11 +24,6 @@ from django.contrib.auth import views as auth_views
 
 admin.autodiscover()
 
-# urlpatterns = patterns('',
-#    url(r'^$', profile.views.home, name='home'),
-#
-# )
-
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', Home.as_view(), name='home'),
